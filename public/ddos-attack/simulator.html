@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUCID · Attack & Detection Lab</title>
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5/index.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5/index.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Simulator-specific overrides for full-screen layout */
+    .scan-line { display: none; }
+    .sim-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0a0a0a;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 52px;
+      gap: 1rem;
+    }
+    .sim-header-left {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .sim-header .logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .sim-header .logo-icon { color: var(--accent); font-size: 16px; }
+    .sim-header .logo-text {
+      font-family: var(--display);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: .02em;
+    }
+    .sim-header .logo-sub {
+      font-size: 10px;
+      font-weight: 400;
+      color: var(--text-dim);
+      letter-spacing: .06em;
+      margin-left: 2px;
+    }
+    .sim-header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .sim-header-right a {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color .2s;
+    }
+    .sim-header-right a:hover { color: var(--accent); }
+    .sim-header-right .nav-cta {
+      color: var(--accent);
+      border: 1px solid var(--border-hi);
+      padding: 5px 12px;
+      border-radius: 4px;
+    }
+    /* Full-viewport simulation wrapper */
+    .sim-page-body {
+      padding: .5rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2; /* above matrix rain canvas (z-index:1) */
+    }
+    .sim-page-title {
+      padding: 1.25rem 0 1rem;
+      margin-bottom: 0;
+    }
+    .sim-page-title h1 {
+      font-family: var(--display);
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+    .sim-page-title p {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Override sim-section padding for full-page use */
+    .sim-section {
+      max-width: 100%;
+      padding: 0;
+    }
+    .about-section, .results-section {
+      max-width: 100%;
+      padding: 2.5rem 0;
+    }
+
+    /* Wider grid for real desktop */
+    .sim-layout {
+      grid-template-columns: 280px 1fr 320px;
+    }
+    @media (max-width: 1100px) {
+      .sim-layout { grid-template-columns: 1fr; }
+    }
+
+    .page-footer {
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 0;
+      margin-top: 1rem;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* ---- Sim title block-art ---- */
+    #sim-title-art { margin-bottom: 1rem; position: relative; line-height: 0; }
+    #sim-title-art .ta-line { display: flex; align-items: flex-start; flex-wrap: nowrap; }
+    #sim-title-art .ta-char { position: relative; flex-shrink: 0; }
+    #sim-title-art .ta-block {
+      position: absolute;
+      background: #ffffff;
+      opacity: 0;
+      transform: scaleY(0.05);
+      transform-origin: center;
+    }
+    #sim-title-art .ta-block.vis {
+      opacity: 1;
+      transform: scaleY(1);
+      transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.3,0.64,1);
+    }
+
+    /* ---- Methodology Section ---- */
+    .methodology-section {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 0;
+    }
+    .method-step {
+      display: grid;
+      grid-template-columns: 44px 1fr 1fr;
+      gap: 1.5rem 2rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+      align-items: start;
+    }
+    .method-step:last-child { border-bottom: none; }
+    @media (max-width: 900px) {
+      .method-step { grid-template-columns: 44px 1fr; }
+      .method-step-code { grid-column: 1 / -1; }
+    }
+    .step-icon {
+      width: 40px; height: 40px;
+      background: rgba(48,128,255,0.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent);
+      font-size: 17px;
+      flex-shrink: 0;
+    }
+    .step-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: .4rem;
+    }
+    .step-desc {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-bottom: .75rem;
+    }
+    .step-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .step-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      background: rgba(48,128,255,0.10);
+      color: var(--accent);
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 11px;
+      transition: background .15s;
+    }
+    .step-tag:hover { background: rgba(48,128,255,0.22); }
+    .method-step-code pre {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: #F8F8F2;
+      line-height: 1.65;
+      margin: 0;
+      white-space: pre;
+    }
+    .tk-kw   { color: #bd93f9; font-style: italic; }
+    .tk-fn   { color: #50fa7b; }
+    .tk-str  { color: #ff79c6; }
+    .tk-num  { color: #ffb86c; }
+    .tk-cm   { color: #6272a4; font-style: italic; }
+    .tk-flag { color: #8be9fd; }
+
+    /* ---- Insight Cards ---- */
+    .insights-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 900px) { .insights-grid { grid-template-columns: 1fr; } }
+    .insight-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: border-color .2s;
+    }
+    .insight-card:hover { border-color: var(--border-hi); }
+    .insight-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      background: rgba(48,128,255,0.12);
+      padding: 3px 8px;
+      border-radius: 99px;
+      margin-bottom: .75rem;
+      letter-spacing: .04em;
+    }
+    .insight-card h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: .4rem;
+    }
+    .insight-card p {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.65;
+    }
+    .hi-good { color: var(--green);  font-weight: 700; }
+    .hi-warn { color: var(--warn);   font-weight: 600; }
+    .hi-bad  { color: var(--danger); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="scan-line"></div>
+
+  <!-- Slim simulator header -->
+  <header class="sim-header">
+    <div class="sim-header-left">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">LUCID<span class="logo-sub">IDS</span></span>
+      </div>
+    </div>
+    <div class="sim-header-right">
+      <a href="#methodology">Steps</a>
+      <a href="#results">Results</a>
+      <a href="https://github.com/doriguzzi/lucid-ddos" target="_blank" rel="noopener" class="nav-cta">Source ↗</a>
+    </div>
+  </header>
+
+  <div class="sim-page-body">
+    <!-- Page title -->
+    <div class="sim-page-title">
+      <div id="sim-title-art" role="heading" aria-level="1" aria-label="Attack + Detection Lab"></div>
+      <p>Configure the botnet, launch an attack, and watch LUCID respond in real-time.</p>
+    </div>
+
+    <!-- Simulation -->
+    <section class="sim-section" id="simulation">
+      <div class="sim-layout">
+
+        <!-- Left: Controls -->
+        <aside class="sim-controls">
+          <div class="ctrl-panel">
+            <div class="panel-header">
+              <span class="panel-icon">⚙</span> Configuration
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-label">Attack vector</label>
+              <div class="seg-ctrl" id="atk-seg">
+                <button class="seg-btn active" data-val="tcp">TCP</button>
+                <button class="seg-btn" data-val="udp">UDP</button>
+                <button class="seg-btn" data-val="get">GET</button>
+                <button class="seg-btn" data-val="all">All</button>
+              </div>
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-label">Threads per bot <span class="ctrl-val-display" id="threads-disp">3</span></label>
+              <div class="slider-wrap">
+                <input type="range" min="1" max="10" value="3" id="threads-slider" class="custom-slider">
+                <div class="slider-track-fill" id="threads-fill"></div>
+              </div>
+              <div class="slider-ticks"><span>1</span><span>5</span><span>10</span></div>
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-label">Duration (seconds) <span class="ctrl-val-display" id="dur-disp">30</span></label>
+              <div class="slider-wrap">
+                <input type="range" min="10" max="60" value="30" step="5" id="dur-slider" class="custom-slider">
+                <div class="slider-track-fill" id="dur-fill"></div>
+              </div>
+              <div class="slider-ticks"><span>10s</span><span>35s</span><span>60s</span></div>
+            </div>
+
+            <div class="ctrl-group">
+              <label class="ctrl-label">LUCID model</label>
+              <select id="model-sel" class="custom-select">
+                <option value="old">Original dataset (10t-50n)</option>
+                <option value="new" selected>New dataset (10t-50n)</option>
+                <option value="new5t">New dataset (5t-100n)</option>
+              </select>
+            </div>
+
+            <div class="ctrl-group">
+              <div class="cmd-preview" id="cmd-preview">
+                <div class="cmd-label">// MHDDoS command</div>
+                <div class="cmd-line" id="cmd-text">python3 start.py tcp 192.168.1.78:9000 3 30</div>
+              </div>
+            </div>
+
+            <div class="ctrl-buttons">
+              <button class="btn-launch" id="btn-launch" onclick="startSim()">
+                <span class="btn-icon">▶</span> Launch Attack
+              </button>
+              <button class="btn-stop" id="btn-stop" onclick="stopSim()" disabled>
+                <span class="btn-icon">■</span> Stop
+              </button>
+            </div>
+
+            <div class="status-row">
+              <div class="status-dot-wrap">
+                <div class="status-dot" id="status-dot"></div>
+              </div>
+              <span class="status-text" id="status-text">System idle</span>
+              <span class="status-time" id="status-time">T+0s</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Center: Network Topology -->
+        <main class="sim-center">
+          <div class="topo-canvas" id="topo">
+            <svg id="topo-svg" width="100%" height="100%" viewBox="0 0 560 320" preserveAspectRatio="xMidYMid meet">
+              <line id="line-b1" x1="112" y1="70" x2="248" y2="155" stroke="#ff4444" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+              <line id="line-b2" x1="112" y1="155" x2="248" y2="155" stroke="#ff8800" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+              <line id="line-b3" x1="112" y1="240" x2="248" y2="155" stroke="#0088ff" stroke-width="1" stroke-dasharray="4 4" opacity="0.3"/>
+              <line id="line-rv" x1="312" y1="155" x2="408" y2="100" stroke="#00ffaa" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4"/>
+              <line id="line-rl" x1="312" y1="155" x2="408" y2="215" stroke="#00ffaa" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4"/>
+              <g id="packets-layer"></g>
+              <g id="node-b1" class="topo-node attacker">
+                <rect x="32" y="44" width="80" height="52" rx="8"/>
+                <text x="72" y="67" text-anchor="middle" class="node-title">BOT 01</text>
+                <text x="72" y="82" text-anchor="middle" class="node-sub">TCP flood</text>
+                <text x="72" y="94" text-anchor="middle" class="node-ip">:9000</text>
+              </g>
+              <g id="node-b2" class="topo-node attacker">
+                <rect x="32" y="129" width="80" height="52" rx="8"/>
+                <text x="72" y="152" text-anchor="middle" class="node-title">BOT 02</text>
+                <text x="72" y="167" text-anchor="middle" class="node-sub">UDP flood</text>
+                <text x="72" y="179" text-anchor="middle" class="node-ip">:7000</text>
+              </g>
+              <g id="node-b3" class="topo-node attacker">
+                <rect x="32" y="214" width="80" height="52" rx="8"/>
+                <text x="72" y="237" text-anchor="middle" class="node-title">BOT 03</text>
+                <text x="72" y="252" text-anchor="middle" class="node-sub">GET flood</text>
+                <text x="72" y="264" text-anchor="middle" class="node-ip">:8080</text>
+              </g>
+              <g id="node-router" class="topo-node router">
+                <polygon points="280,120 316,155 280,190 244,155" class="diamond-fill"/>
+                <text x="280" y="151" text-anchor="middle" class="node-title">ROUT</text>
+                <text x="280" y="165" text-anchor="middle" class="node-sub">ER</text>
+              </g>
+              <g id="node-victim" class="topo-node victim">
+                <rect x="398" y="74" width="90" height="52" rx="8"/>
+                <text x="443" y="97" text-anchor="middle" class="node-title">VICTIM</text>
+                <text x="443" y="112" text-anchor="middle" class="node-sub">192.168.1.78</text>
+                <text x="443" y="124" text-anchor="middle" class="node-ip">HTTP/TCP/UDP</text>
+              </g>
+              <g id="node-lucid" class="topo-node lucid">
+                <rect x="398" y="188" width="90" height="52" rx="8"/>
+                <text x="443" y="211" text-anchor="middle" class="node-title">LUCID IDS</text>
+                <text x="443" y="226" text-anchor="middle" class="node-sub">CNN detector</text>
+                <text x="443" y="238" text-anchor="middle" class="node-ip">interface: en1</text>
+              </g>
+              <text x="72" y="22" text-anchor="middle" class="zone-label" fill="#ff4444">ATTACKER</text>
+              <text x="443" y="52" text-anchor="middle" class="zone-label" fill="#00ffaa">SERVER</text>
+            </svg>
+          </div>
+
+          <div class="metrics-strip">
+            <div class="mstripe-item">
+              <span class="ms-val" id="ms-pkts">0</span>
+              <span class="ms-lbl">Packets</span>
+            </div>
+            <div class="mstripe-sep"></div>
+            <div class="mstripe-item">
+              <span class="ms-val danger" id="ms-ddos">0</span>
+              <span class="ms-lbl">DDoS samples</span>
+            </div>
+            <div class="mstripe-sep"></div>
+            <div class="mstripe-item">
+              <span class="ms-val success" id="ms-acc">—</span>
+              <span class="ms-lbl">Accuracy</span>
+            </div>
+            <div class="mstripe-sep"></div>
+            <div class="mstripe-item">
+              <span class="ms-val success" id="ms-f1">—</span>
+              <span class="ms-lbl">F1 score</span>
+            </div>
+            <div class="mstripe-sep"></div>
+            <div class="mstripe-item">
+              <span class="ms-val warn" id="ms-thr">0</span>
+              <span class="ms-lbl">Threshold / 200</span>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right: Charts + Log -->
+        <aside class="sim-right">
+          <div class="right-panel" id="detect-panel">
+            <div class="panel-header"><span class="panel-icon">◈</span> LUCID Metrics</div>
+            <div class="metric-bars">
+              <div class="mbar-row">
+                <span class="mbar-lbl">Accuracy</span>
+                <div class="mbar-bg"><div class="mbar-fill blue" id="bar-acc" style="width:0%"></div></div>
+                <span class="mbar-val" id="val-acc">—</span>
+              </div>
+              <div class="mbar-row">
+                <span class="mbar-lbl">F1 Score</span>
+                <div class="mbar-bg"><div class="mbar-fill green" id="bar-f1" style="width:0%"></div></div>
+                <span class="mbar-val" id="val-f1">—</span>
+              </div>
+              <div class="mbar-row">
+                <span class="mbar-lbl">TPR</span>
+                <div class="mbar-bg"><div class="mbar-fill teal" id="bar-tpr" style="width:0%"></div></div>
+                <span class="mbar-val" id="val-tpr">—</span>
+              </div>
+              <div class="mbar-row">
+                <span class="mbar-lbl">FPR</span>
+                <div class="mbar-bg"><div class="mbar-fill red" id="bar-fpr" style="width:0%"></div></div>
+                <span class="mbar-val" id="val-fpr">—</span>
+              </div>
+              <div class="mbar-row">
+                <span class="mbar-lbl">DDoS%</span>
+                <div class="mbar-bg"><div class="mbar-fill orange" id="bar-ddos" style="width:0%"></div></div>
+                <span class="mbar-val" id="val-ddos">—</span>
+              </div>
+            </div>
+            <div class="threshold-bar" id="threshold-row">
+              <div class="thr-label">Management trigger</div>
+              <div class="thr-status inactive" id="thr-status">INACTIVE</div>
+            </div>
+          </div>
+
+          <div class="right-panel chart-panel">
+            <div class="panel-header"><span class="panel-icon">◫</span> Traffic timeline</div>
+            <div class="chart-wrap">
+              <canvas id="timeline-chart" role="img" aria-label="Live packet volume timeline">Packet volume timeline</canvas>
+            </div>
+          </div>
+
+          <div class="right-panel log-panel">
+            <div class="panel-header">
+              <span><span class="panel-icon">▸</span> Event log</span>
+              <button class="clear-btn" onclick="clearLog()">clear</button>
+            </div>
+            <div class="log-scroll" id="log-box"></div>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- Methodology -->
+    <section class="methodology-section" id="methodology">
+      <div class="section-label">### Methodology</div>
+      <h2 class="section-title">Lab Setup &amp; Implementation</h2>
+      <p class="section-desc">Five steps from Docker botnet deployment through CNN retraining to automated protection.</p>
+
+      <!-- Step 1: Botnet -->
+      <div class="method-step">
+        <div class="step-icon">⬡</div>
+        <div>
+          <div class="step-title">Set Up the Botnet</div>
+          <p class="step-desc">Three Docker containers simulate distinct attack vectors — TCP flood on :9000, UDP flood on :7000, and HTTP GET flood on :8080 — all targeting the victim server at 192.168.1.78.</p>
+          <div class="step-tags">
+            <span class="step-tag">docker</span>
+            <span class="step-tag">mhddos</span>
+            <span class="step-tag">tcp-flood</span>
+            <span class="step-tag">udp-flood</span>
+            <span class="step-tag">get-flood</span>
+          </div>
+        </div>
+        <div class="method-step-code">
+          <pre><span class="tk-cm"># Create shared network and base image</span>
+docker network create botnet
+docker build -t mhddos-image .
+
+<span class="tk-cm"># Bot 01 — TCP flood  (3 threads, 50s)</span>
+docker run -it --name bot01-tcp-flood \
+  --network botnet mhddos-image \
+  tcp 192.168.1.78:<span class="tk-num">9000</span> <span class="tk-num">3</span> <span class="tk-num">50</span>
+
+<span class="tk-cm"># Bot 02 — UDP flood  (3 threads, 50s)</span>
+docker run -it --name bot02-udp-flood \
+  --network botnet mhddos-image \
+  udp 192.168.1.78:<span class="tk-num">7000</span> <span class="tk-num">3</span> <span class="tk-num">50</span>
+
+<span class="tk-cm"># Bot 03 — HTTP GET flood  (50s)</span>
+docker run -it --name bot03-get-flood \
+  --network botnet mhddos-image \
+  GET 192.168.1.78:<span class="tk-num">8080</span> <span class="tk-num">1</span> <span class="tk-num">3</span> http.txt <span class="tk-num">200</span> <span class="tk-num">50</span></pre>
+        </div>
+      </div>
+
+      <!-- Step 2: Retrain LUCID -->
+      <div class="method-step">
+        <div class="step-icon">◈</div>
+        <div>
+          <div class="step-title">Configure &amp; Retrain LUCID</div>
+          <p class="step-desc">The original model was never trained on GET flood patterns. Capture new traffic via Wireshark, register attacker/victim IPs, and retrain on the extended DOS2019 dataset with 10-second time windows.</p>
+          <div class="step-tags">
+            <span class="step-tag">lucid_dataset_parser.py</span>
+            <span class="step-tag">lucid_cnn.py</span>
+            <span class="step-tag">DOS2019</span>
+            <span class="step-tag">--time_window 10</span>
+          </div>
+        </div>
+        <div class="method-step-code">
+          <pre><span class="tk-cm"># lucid_dataset_parser.py — register IP addresses</span>
+DOS2019_FLOWS = {
+    <span class="tk-str">'attackers'</span>: [<span class="tk-str">'172.16.0.5'</span>, <span class="tk-str">'192.168.1.79'</span>],
+    <span class="tk-str">'victims'</span>:   [<span class="tk-str">'192.168.50.1'</span>, <span class="tk-str">'192.168.1.78'</span>]
+}
+
+<span class="tk-cm"># Preprocess traffic captures</span>
+python3 lucid_dataset_parser.py \
+  <span class="tk-flag">--dataset_type</span> DOS2019 \
+  <span class="tk-flag">--dataset_folder</span> ./sample-dataset/ \
+  <span class="tk-flag">--packets_per_flow</span> <span class="tk-num">10</span> \
+  <span class="tk-flag">--traffic_type</span> all \
+  <span class="tk-flag">--time_window</span> <span class="tk-num">10</span>
+
+python3 lucid_dataset_parser.py \
+  <span class="tk-flag">--preprocess_folder</span> ./sample-dataset/
+
+<span class="tk-cm"># Train CNN on extended dataset</span>
+python3 lucid_cnn.py <span class="tk-flag">--train</span> ./sample-dataset/</pre>
+        </div>
+      </div>
+
+      <!-- Step 3: Notification Module -->
+      <div class="method-step">
+        <div class="step-icon">◎</div>
+        <div>
+          <div class="step-title">Add Notification Module</div>
+          <p class="step-desc">Extend LUCID beyond passive detection. A POST-based alert hook forwards each detection result to a management service, which can then shut down or migrate the attacked service automatically.</p>
+          <div class="step-tags">
+            <span class="step-tag">util_function.py</span>
+            <span class="step-tag">lucid_cnn.py</span>
+            <span class="step-tag">--server_url</span>
+            <span class="step-tag">requests.post</span>
+          </div>
+        </div>
+        <div class="method-step-code">
+          <pre><span class="tk-cm"># util_function.py — alert function</span>
+<span class="tk-kw">def</span> <span class="tk-fn">message_to_server</span>(url, data):
+    <span class="tk-kw">try</span>:
+        response = requests.<span class="tk-fn">post</span>(url, json=data)
+        <span class="tk-kw">if</span> response.status_code == <span class="tk-num">200</span>:
+            <span class="tk-fn">print</span>(<span class="tk-str">"Data sent successfully!"</span>)
+    <span class="tk-kw">except</span> RequestException <span class="tk-kw">as</span> e:
+        <span class="tk-fn">print</span>(<span class="tk-str">f"An error occurred: {e}"</span>)
+
+<span class="tk-cm"># lucid_cnn.py — register argument</span>
+parser.<span class="tk-fn">add_argument</span>(
+    <span class="tk-str">'-su'</span>, <span class="tk-str">'--server_url'</span>,
+    default=<span class="tk-kw">None</span>, type=str,
+    help=<span class="tk-str">'URL of the management server endpoint'</span>
+)</pre>
+        </div>
+      </div>
+
+      <!-- Step 4: Run LUCID -->
+      <div class="method-step">
+        <div class="step-icon">▶</div>
+        <div>
+          <div class="step-title">Run LUCID IDS</div>
+          <p class="step-desc">Start live packet capture on network interface en1. LUCID classifies incoming flows every 10 seconds and streams JSON metrics — accuracy, F1, TPR, FPR — to the optional management server endpoint.</p>
+          <div class="step-tags">
+            <span class="step-tag">--predict_live</span>
+            <span class="step-tag">--model</span>
+            <span class="step-tag">--attack_net</span>
+            <span class="step-tag">--victim_net</span>
+          </div>
+        </div>
+        <div class="method-step-code">
+          <pre>python3 lucid_cnn.py \
+  <span class="tk-flag">--predict_live</span> en1 \
+  <span class="tk-flag">--model</span> ./output/<span class="tk-str">10t-50n-DOS2019-LUCID.h5</span> \
+  <span class="tk-flag">--server_url</span> <span class="tk-str">http://localhost:6000/api/msg</span> \
+  <span class="tk-flag">--attack_net</span>  <span class="tk-num">192.168.1.79</span> \
+  <span class="tk-flag">--victim_net</span>  <span class="tk-num">192.168.1.78</span>
+
+<span class="tk-cm"># Sample JSON output per 10-second window</span>
+{
+  <span class="tk-str">'Model'</span>:    <span class="tk-str">'DOS2019-LUCID'</span>,
+  <span class="tk-str">'Packets'</span>:  <span class="tk-num">3095</span>,  <span class="tk-str">'Samples'</span>: <span class="tk-num">83</span>,
+  <span class="tk-str">'DDOS%'</span>:    <span class="tk-str">'0.916'</span>,
+  <span class="tk-str">'Accuracy'</span>: <span class="tk-str">'0.9157'</span>, <span class="tk-str">'F1Score'</span>: <span class="tk-str">'0.9560'</span>,
+  <span class="tk-str">'TPR'</span>:      <span class="tk-str">'0.9157'</span>, <span class="tk-str">'FPR'</span>:     <span class="tk-str">'N/A'</span>
+}</pre>
+        </div>
+      </div>
+
+      <!-- Step 5: Management Service -->
+      <div class="method-step">
+        <div class="step-icon">◫</div>
+        <div>
+          <div class="step-title">Management Service &amp; Protection</div>
+          <p class="step-desc">The Node.js management service on port 6000 monitors LUCID's JSON stream. When DDoS% exceeds 67% or the threshold (DDoS% × Packets) surpasses 200, it shuts down the attacked service.</p>
+          <div class="step-tags">
+            <span class="step-tag">DDOS%</span>
+            <span class="step-tag">threshold = DDoS% × Packets</span>
+            <span class="step-tag">port 6000</span>
+            <span class="step-tag">httpServer.close()</span>
+          </div>
+        </div>
+        <div class="method-step-code">
+          <pre><span class="tk-kw">const</span> ddos = jsonData[<span class="tk-str">'DDOS%'</span>];
+<span class="tk-kw">const</span> pkgs = jsonData[<span class="tk-str">'Packets'</span>];
+
+<span class="tk-cm">// Trigger if DDoS% > 67% OR threshold ≥ 200 samples</span>
+<span class="tk-kw">if</span> (ddos && pkgs) {
+  <span class="tk-kw">const</span> threshold = pkgs * ddos;
+
+  <span class="tk-kw">if</span> (ddos > <span class="tk-num">0.67</span> || threshold >= <span class="tk-num">200</span>) {
+    res.<span class="tk-fn">end</span>(<span class="tk-str">'High DDOS% detected. Shutting down.'</span>);
+    httpServer.<span class="tk-fn">close</span>(() =&gt; {
+      console.<span class="tk-fn">log</span>(<span class="tk-str">'HTTP server has been shut down.'</span>);
+    });
+  } <span class="tk-kw">else</span> {
+    res.<span class="tk-fn">end</span>(<span class="tk-str">'DDOS% is not detected.'</span>);
+  }
+}</pre>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Results -->
+    <section class="results-section" id="results">
+      <div class="section-label">// Lab Results</div>
+      <h2 class="section-title">Benchmark Results</h2>
+      <p class="section-desc">Accuracy and F1 scores from the paper, across attack types, model configurations, and time window / packet configurations.</p>
+
+      <div class="results-tabs">
+        <button class="rtab active" data-tab="tcp" onclick="showTab('tcp', this)">TCP Flood</button>
+        <button class="rtab" data-tab="udp" onclick="showTab('udp', this)">UDP Flood</button>
+        <button class="rtab" data-tab="get" onclick="showTab('get', this)">GET Flood</button>
+      </div>
+
+      <div class="results-table-wrap">
+        <table class="results-table" id="res-tcp">
+          <thead>
+            <tr><th>Dataset</th><th>10t-10n</th><th>10t-50n</th><th>10t-100n</th><th>5t-10n</th><th>5t-50n</th><th>5t-100n</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-head"><td colspan="7">Trained with original dataset</td></tr>
+            <tr><td>Accuracy</td><td class="bad">0.042</td><td class="bad">0.004</td><td class="bad">0.020</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td>F1 Score</td><td class="bad">0.034</td><td class="bad">0.004</td><td class="bad">0.007</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr class="row-head"><td colspan="7">Trained with new dataset</td></tr>
+            <tr><td>Accuracy</td><td class="mid">0.795</td><td class="mid">0.816</td><td class="mid">0.811</td><td class="good">0.966</td><td class="good">0.959</td><td class="good">0.935</td></tr>
+            <tr><td>F1 Score</td><td class="mid">0.879</td><td class="mid">0.894</td><td class="mid">0.880</td><td class="good">0.983</td><td class="good">0.978</td><td class="good">0.965</td></tr>
+          </tbody>
+        </table>
+
+        <table class="results-table hidden" id="res-udp">
+          <thead>
+            <tr><th>Dataset</th><th>10t-10n</th><th>10t-50n</th><th>10t-100n</th><th>5t-10n</th><th>5t-50n</th><th>5t-100n</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-head"><td colspan="7">Trained with original dataset</td></tr>
+            <tr><td>Accuracy</td><td class="good">1.000</td><td class="good">1.000</td><td class="good">1.000</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td>F1 Score</td><td class="good">1.000</td><td class="good">1.000</td><td class="good">1.000</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr class="row-head"><td colspan="7">Trained with new dataset</td></tr>
+            <tr><td>Accuracy</td><td class="good">1.000</td><td class="good">1.000</td><td class="good">1.000</td><td class="bad">0.000</td><td class="mid">0.764</td><td class="mid">0.758</td></tr>
+            <tr><td>F1 Score</td><td class="good">1.000</td><td class="good">1.000</td><td class="good">1.000</td><td class="bad">0.000</td><td class="mid">0.857</td><td class="mid">0.857</td></tr>
+          </tbody>
+        </table>
+
+        <table class="results-table hidden" id="res-get">
+          <thead>
+            <tr><th>Dataset</th><th>10t-10n</th><th>10t-50n</th><th>10t-100n</th><th>5t-10n</th><th>5t-50n</th><th>5t-100n</th></tr>
+          </thead>
+          <tbody>
+            <tr class="row-head"><td colspan="7">Trained with original dataset</td></tr>
+            <tr><td>Accuracy</td><td class="bad">0.066</td><td class="bad">0.098</td><td class="bad">0.041</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr><td>F1 Score</td><td class="bad">0.114</td><td class="bad">0.078</td><td class="bad">0.017</td><td>—</td><td>—</td><td>—</td></tr>
+            <tr class="row-head"><td colspan="7">Trained with new dataset</td></tr>
+            <tr><td>Accuracy</td><td class="mid">0.829</td><td class="mid">0.806</td><td class="mid">0.732</td><td class="mid">0.830</td><td class="mid">0.860</td><td class="mid">0.795</td></tr>
+            <tr><td>F1 Score</td><td class="mid">0.904</td><td class="mid">0.889</td><td class="mid">0.832</td><td class="mid">0.899</td><td class="good">0.919</td><td class="mid">0.873</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insights-grid">
+        <div class="insight-card">
+          <div class="insight-badge">TCP Flood</div>
+          <h4>Retraining Is Critical</h4>
+          <p>Original dataset accuracy: as low as <span class="hi-bad">0.004</span>. New dataset (5t-100n): <span class="hi-good">0.935 acc / 0.965 F1</span>. A 233× improvement — LUCID's performance is entirely dependent on representative training data matching the actual environment.</p>
+        </div>
+        <div class="insight-card">
+          <div class="insight-badge">UDP Flood</div>
+          <h4>Suspicious Perfect Scores</h4>
+          <p>All original-dataset configs score exactly <span class="hi-warn">1.000</span> — likely data overlap or overfitting. When the 5t model is evaluated on genuinely new data, accuracy drops to <span class="hi-warn">0.764</span>, revealing that the 1.0 result was anomalous rather than representative.</p>
+        </div>
+        <div class="insight-card">
+          <div class="insight-badge">GET Flood</div>
+          <h4>New Attack Type Adaptation</h4>
+          <p>LUCID was never exposed to GET floods during initial training: original accuracy <span class="hi-bad">0.066</span>. After capturing GET flood pcaps and extending the dataset, accuracy rebounded to <span class="hi-good">0.829–0.860</span> — validating LUCID's dataset-agnostic preprocessing design.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      Built for educational demonstration purposes only. No actual attacks are performed.
+      · NYIT Vancouver · Department of Computer Science · 2024
+    </footer>
+
+  </div><!-- /sim-page-body -->
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="simulation.js"></script>
+
+  <script>
+  /* ── Sim-page block-art title renderer ────────────────────────────── */
+  (function () {
+    'use strict';
+
+    /*
+     * Character map — IBM Plex Mono basis, 5×7 dot-matrix pixel font
+     * rows: array of 7 arrays, each a row of 0/1 pixels
+     */
+    var C = {
+      /* t — crossbar at row 2, angled foot */
+      t: { w:4, rows:[[0,1,0,0],[0,1,0,0],[1,1,1,0],[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,0,1,1]] },
+      /* e — x-height, cross-bar at mid, open bottom-right exit */
+      e: { w:4, rows:[[0,0,0,0],[0,0,0,0],[0,1,1,0],[1,0,0,1],[1,1,1,1],[1,0,0,0],[0,1,1,1]] },
+      /* c — open-right arc, x-height */
+      c: { w:4, rows:[[0,0,0,0],[0,0,0,0],[0,1,1,1],[1,0,0,0],[1,0,0,0],[1,0,0,0],[0,1,1,1]] },
+      /* i — dot at row 0, gap at row 1, body rows 2–6 */
+      i: { w:3, rows:[[0,1,0],[0,0,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0]] },
+      /* o — symmetric oval, x-height */
+      o: { w:4, rows:[[0,0,0,0],[0,0,0,0],[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[0,1,1,0]] },
+      /* n — arch at row 2, two legs */
+      n: { w:4, rows:[[0,0,0,0],[0,0,0,0],[1,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1]] },
+      /* a — single-story; open-top bowl, closed bottom with right leg */
+      a: { w:4, rows:[[0,0,0,0],[0,0,0,0],[0,1,1,0],[0,0,0,1],[0,1,1,1],[1,0,0,1],[0,1,1,1]] },
+      /* b — full-height stem, open-right bowl */
+      b: { w:4, rows:[[1,0,0,0],[1,0,0,0],[1,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,1,1,0]] },
+      /* l — narrow 3-wide, cap-height serif top, angled foot */
+      l: { w:3, rows:[[1,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,1]] },
+      /* D — full 7-row capital, right-side arc */
+      D: { w:4, rows:[[1,1,1,0],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,0,0,1],[1,1,1,0]] },
+      /* A — peak at row 0, crossbar at row 3, two legs */
+      A: { w:4, rows:[[0,1,1,0],[1,0,0,1],[1,0,0,1],[1,1,1,1],[1,0,0,1],[1,0,0,1],[1,0,0,1]] },
+      /* k — full ascender, two mirrored diagonals */
+      k: { w:4, rows:[[1,0,0,0],[1,0,0,1],[1,0,1,0],[1,1,0,0],[1,0,1,0],[1,0,0,1],[1,0,0,1]] },
+      /* L — full ascender, horizontal base */
+      L: { w:4, rows:[[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,0,0,0],[1,1,1,1]] },
+      /* + — cross arms centred in cap-height grid */
+      '+': { w:4, rows:[[0,0,0,0],[0,0,0,0],[0,1,0,0],[1,1,1,0],[0,1,0,0],[0,0,0,0],[0,0,0,0]] },
+      /* ' ' — 2-wide empty spacer */
+      ' ': { w:2, rows: Array(7).fill([0,0]) },
+    };
+
+    var COLOR      = '#ffffff';
+    var GAP        = 2;
+    var LGAP       = 3;
+    var ROWS       = 7;
+    var LINES      = ['Attack + Detection Lab'];
+    var ROW_DELAY  = 150;
+    var INIT_DELAY = 400;
+
+    var root = document.getElementById('sim-title-art');
+    if (!root) return;
+
+    function calcBS() {
+      var avail = root.offsetWidth;
+      var line  = LINES[0];
+      var cols = 0, igaps = 0, lcount = 0;
+      for (var k = 0; k < line.length; k++) {
+        var d = C[line[k]];
+        if (d) { cols += d.w; igaps += (d.w - 1); lcount++; }
+      }
+      var overhead = igaps * GAP + (lcount - 1) * LGAP;
+      return Math.max(5, Math.min(14, Math.floor((avail - overhead) / cols)));
+    }
+
+    /* liveBlocks: [el, rowIndex] — used for the row-reveal animation */
+    var liveBlocks = [];
+    var lastBS     = 0;
+
+    function render(bs) {
+      root.innerHTML = '';
+      root.style.opacity = ''; /* restore visibility */
+      liveBlocks = [];
+      lastBS = bs;
+      var rr = Math.round(bs * 0.18);
+
+      LINES.forEach(function (line, li) {
+        var lineEl = document.createElement('div');
+        lineEl.className = 'ta-line';
+        if (li > 0) lineEl.style.marginTop = Math.round(bs * 2.2) + 'px';
+
+        var firstChar = true;
+        for (var ci = 0; ci < line.length; ci++) {
+          var ch  = line[ci];
+          var def = C[ch];
+          if (!def) continue;
+
+          var cW = def.w * (bs + GAP) - GAP;
+          var cH = ROWS  * (bs + GAP) - GAP;
+          var charEl = document.createElement('div');
+          charEl.className = 'ta-char';
+          charEl.style.width  = cW + 'px';
+          charEl.style.height = cH + 'px';
+          if (!firstChar) charEl.style.marginLeft = LGAP + 'px';
+          firstChar = false;
+
+          def.rows.forEach(function (row, y) {
+            row.forEach(function (cell, x) {
+              if (!cell) return;
+              var blockEl = document.createElement('div');
+              blockEl.className = 'ta-block';
+              blockEl.style.left         = (x * (bs + GAP)) + 'px';
+              blockEl.style.top          = (y * (bs + GAP)) + 'px';
+              blockEl.style.width        = bs + 'px';
+              blockEl.style.height       = bs + 'px';
+              blockEl.style.borderRadius = rr + 'px';
+              blockEl.dataset.row        = y;
+              charEl.appendChild(blockEl);
+              liveBlocks.push([blockEl, y]);
+            });
+          });
+
+          lineEl.appendChild(charEl);
+        }
+        root.appendChild(lineEl);
+      });
+
+      for (var row = 0; row < ROWS; row++) {
+        (function (r) {
+          setTimeout(function () {
+            liveBlocks.forEach(function (pair) {
+              if (pair[1] === r) pair[0].classList.add('vis');
+            });
+          }, INIT_DELAY + r * ROW_DELAY);
+        })(row);
+      }
+
+      alignGrid(bs);
+    }
+
+    /* ── Matrix rain ────────────────────────────────────────────────────
+     * Fixed-position canvas appended to <body> at z-index:1.
+     * Sits above .bg-grid (z-index:0) but below .sim-page-body (z-index:2)
+     * so the title and simulation panels remain fully visible.
+     * Each column steps down one block at a time (discrete, not smooth)
+     * to match the classic matrix rain look.
+     */
+    var rainCanvas = null, rainCtx = null, rainRAF = null, rainCols = [];
+    var RAIN_PITCH = 14; /* fixed block size for full-screen rain */
+
+    function startRain() {
+      stopRain();
+      root.style.opacity = '0'; /* hide title while rain runs */
+
+      rainCanvas = document.createElement('canvas');
+      rainCanvas.style.cssText =
+        'position:fixed;top:0;left:0;width:100vw;height:100vh;' +
+        'pointer-events:none;z-index:1;';
+      document.body.appendChild(rainCanvas);
+      rainCtx = rainCanvas.getContext('2d');
+
+      rainCanvas.width  = window.innerWidth;
+      rainCanvas.height = window.innerHeight;
+
+      var numCols = Math.ceil(rainCanvas.width / RAIN_PITCH);
+      rainCols = [];
+      for (var i = 0; i < numCols; i++) {
+        rainCols.push({
+          x:       i * RAIN_PITCH,
+          y:       -Math.floor(Math.random() * 24) * RAIN_PITCH,
+          tailLen: 8  + Math.floor(Math.random() * 14),
+          counter: 0,
+          speed:   3  + Math.floor(Math.random() * 5),
+        });
+      }
+
+      (function tick() {
+        rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+
+        rainCols.forEach(function (col) {
+          col.counter++;
+          if (col.counter >= col.speed) {
+            col.counter = 0;
+            col.y += RAIN_PITCH;
+            if (col.y - col.tailLen * RAIN_PITCH > rainCanvas.height) {
+              col.y       = -Math.floor(Math.random() * 16) * RAIN_PITCH;
+              col.tailLen = 8  + Math.floor(Math.random() * 14);
+              col.speed   = 3  + Math.floor(Math.random() * 5);
+            }
+          }
+
+          for (var i = 0; i < col.tailLen; i++) {
+            var by = col.y - i * RAIN_PITCH;
+            if (by < -RAIN_PITCH || by > rainCanvas.height) continue;
+
+            var r, g, b, a;
+            if (i === 0) {
+              r = 200; g = 255; b = 200; a = 0.95;          /* head: near-white */
+            } else if (i < 4) {
+              var t1 = i / 4;
+              r = 0; g = Math.round(255 - 95 * t1); b = 35;
+              a = 0.85 - t1 * 0.15;                          /* bright green    */
+            } else {
+              var t2 = (i - 4) / Math.max(col.tailLen - 4, 1);
+              r = 0; g = Math.round(160 - 145 * t2); b = 20;
+              a = 0.55 * (1 - t2 * 0.9);                     /* fading tail     */
+            }
+
+            rainCtx.fillStyle =
+              'rgba(' + r + ',' + g + ',' + b + ',' + a.toFixed(2) + ')';
+            rainCtx.fillRect(
+              col.x + 1, by + 1,
+              RAIN_PITCH - 2, RAIN_PITCH - 2  /* 1px gap on each side */
+            );
+          }
+        });
+
+        rainRAF = requestAnimationFrame(tick);
+      })();
+    }
+
+    function stopRain() {
+      if (rainRAF) { cancelAnimationFrame(rainRAF); rainRAF = null; }
+      if (rainCanvas && rainCanvas.parentNode) {
+        rainCanvas.parentNode.removeChild(rainCanvas);
+      }
+      rainCanvas = null; rainCtx = null; rainCols = [];
+    }
+
+    /* Stop → kill rain and restore title with normal reveal animation. */
+    function restore() {
+      stopRain();
+      init();
+    }
+
+    /*
+     * Align the page background grid to the block-art title.
+     * Grid pitch = bs + GAP matches the cell pitch of the block art.
+     * backgroundPosition offsets so grid lines fall on cell boundaries,
+     * making the grid appear woven into the characters.
+     */
+    function alignGrid(bs) {
+      var grid = document.querySelector('.bg-grid');
+      if (!grid || bs < 1) return;
+      var pitch = bs + GAP;
+      var rect  = root.getBoundingClientRect();
+      var ox = ((rect.left % pitch) + pitch) % pitch;
+      var oy = ((rect.top  % pitch) + pitch) % pitch;
+      grid.style.backgroundSize     = pitch + 'px ' + pitch + 'px';
+      grid.style.backgroundPosition = ox + 'px ' + oy + 'px';
+    }
+
+    /*
+     * Extend the grid mask so it stays fully opaque down to the top
+     * of .sim-section. Measures the section's document offset, converts
+     * to a viewport-height percentage (the unit .bg-grid mask uses),
+     * then rewrites the mask-image with a tight 10% fade zone after it.
+     */
+    function extendGridMask() {
+      var grid    = document.querySelector('.bg-grid');
+      var section = document.querySelector('.sim-section');
+      if (!grid || !section) return;
+      var docTop  = section.getBoundingClientRect().top + window.scrollY;
+      var solidPct = Math.round((docTop / window.innerHeight) * 100);
+      var fadePct  = Math.min(solidPct + 10, 100);
+      var mask = 'linear-gradient(to bottom, black 0%, black ' +
+                 solidPct + '%, transparent ' + fadePct + '%)';
+      grid.style.maskImage       = mask;
+      grid.style.webkitMaskImage = mask;
+    }
+
+    var resizeTimer;
+    function init() {
+      render(calcBS());
+      extendGridMask();
+    }
+    setTimeout(init, 0);
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(init, 120);
+    });
+    window.addEventListener('scroll', function () {
+      if (root) alignGrid(calcBS());
+    }, { passive: true });
+
+    /* Hook matrix rain to simulation buttons */
+    var btnLaunch = document.getElementById('btn-launch');
+    var btnStop   = document.getElementById('btn-stop');
+    if (btnLaunch) btnLaunch.addEventListener('click', startRain);
+    if (btnStop)   btnStop.addEventListener('click',   restore);
+
+    /* Auto-stop: when the simulation completes on its own, status-dot
+     * receives class "done". Observe that and end the rain + restore title. */
+    var statusDot = document.getElementById('status-dot');
+    if (statusDot) {
+      new MutationObserver(function () {
+        if (statusDot.classList.contains('done') && rainRAF !== null) {
+          restore();
+        }
+      }).observe(statusDot, { attributes: true, attributeFilter: ['class'] });
+    }
+  })();
+  </script>
+</body>
+</html>

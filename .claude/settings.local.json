@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://bonsplit.alasdairmonk.com/_next/static/chunks/df37ba188d0d4515.js?dpl=dpl_2mAu1tijNPxybDzXSFVCD5saVCMq\")",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}

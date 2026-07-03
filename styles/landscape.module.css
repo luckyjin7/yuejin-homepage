@@ -1,0 +1,314 @@
+/* CSS custom properties are injected via <style> in landscape.js <Head> */
+
+@keyframes inspoReveal {
+  from { clip-path: inset(0 0 100% 0); transform: translateY(30px); opacity: 0; }
+  to   { clip-path: inset(0 0 0% 0);   transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Page wrapper ─────────────────────────────────────────────── */
+.page {
+  background: var(--ls-surface-page);
+  font-family: var(--ls-font-sans);
+  color: var(--ls-text-body);
+  margin: 0;
+}
+
+/* ── Hero ──────────────────────────────────────────────────────── */
+.hero {
+  /* flows naturally — height is determined by video aspect ratio + text below */
+}
+
+/* matches the outer layout column of .container so the video fills the same width */
+.heroWrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* wrapper provides the positioning context for the overlaid controls */
+.videoWrapper {
+  position: relative;
+  line-height: 0; /* collapse whitespace gap under the video element */
+  cursor: pointer;
+}
+
+.heroLabel {
+  position: absolute;
+  top: 32px;
+  left: 40px;
+  font-family: var(--ls-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  z-index: 1;
+}
+
+.heroVideo {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* controls float inside the video, 40 px above its bottom edge */
+.controls {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  bottom: 40px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.videoWrapper:hover .controls { opacity: 1; }
+
+.playBtn {
+  background: none;
+  border: none;
+  color: var(--ls-text-strong);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  font-family: inherit;
+}
+.playBtn:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+
+.progressBar {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--ls-accent);
+  cursor: pointer;
+}
+
+/* volume icon + expandable slider */
+.volContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.muteBtn {
+  background: none;
+  border: none;
+  color: var(--ls-text-strong);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.muteBtn:focus-visible { outline: 2px solid var(--ls-accent); outline-offset: 2px; }
+
+.volSlider {
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: width 0.2s ease, opacity 0.2s ease;
+  accent-color: var(--ls-accent);
+  cursor: pointer;
+}
+
+.volContainer:hover .volSlider {
+  width: 80px;
+  opacity: 1;
+}
+
+.heroH1 {
+  margin: 0;
+  padding: 48px 40px 0;
+  font-family: var(--ls-font-sans);
+  font-weight: 400;
+  font-size: clamp(56px, 11vw, 128px);
+  line-height: 0.95;
+  letter-spacing: 0.025em;
+  color: var(--ls-text-strong);
+  white-space: nowrap;
+}
+
+/* "Design" is now on a light background — use muted warm tone instead of white */
+.heroH1Dim { color: var(--ls-text-muted); }
+
+.heroHint {
+  margin: 0;
+  padding: 20px 40px 64px;
+  text-align: right;
+  font-family: var(--ls-font-sans);
+  font-size: 16px;
+  color: var(--ls-text-muted);
+}
+
+/* ── Framework containers ──────────────────────────────────────── */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px 160px;
+}
+
+.sectionBorder {
+  border-top: 1px solid var(--ls-border-hairline);
+}
+
+.frameworkMeta {
+  text-align: right;
+  margin: 0 0 88px;
+  padding-top: 40px;
+  font-family: var(--ls-font-sans);
+  font-size: 16px;
+  color: var(--ls-text-muted);
+}
+
+.intro    { max-width: 680px; margin-bottom: 80px; }
+.introWide { max-width: 720px; margin-bottom: 80px; }
+
+.eyebrow {
+  font-family: var(--ls-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ls-text-accent);
+  display: block;
+}
+
+.bodyText {
+  font-family: var(--ls-font-sans);
+  font-size: 19px;
+  line-height: 1.6;
+  color: var(--ls-text-body);
+  margin: 18px 0 0;
+}
+
+/* ── Phase header ──────────────────────────────────────────────── */
+.phaseHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.phaseLabel {
+  font-family: var(--ls-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ls-text-muted);
+  white-space: nowrap;
+}
+
+.phaseAccent { color: var(--ls-text-accent); }
+
+.phaseLine {
+  flex: 1;
+  height: 1px;
+  background: var(--ls-border-strong);
+}
+
+/* ── Image grid ────────────────────────────────────────────────── */
+.grid      { display: flex; gap: 24px; }
+.gridStack { display: flex; flex-direction: column; gap: 48px; }
+.col       { flex: 1; min-width: 0; }
+
+/* ── Image card ────────────────────────────────────────────────── */
+.card {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--ls-radius-md);
+  box-shadow: var(--ls-ring);
+  background: var(--ls-surface-sunken);
+  animation: inspoReveal linear both;
+  animation-timeline: view();
+  animation-range: entry 2% cover 38%;
+}
+
+.cardAlt { background: #ECE6DA; }
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cardImgContain {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.cardMeta { margin-top: 12px; }
+
+.cardTitle {
+  font-family: var(--ls-font-sans);
+  font-weight: 300;
+  font-size: clamp(20px, 2.4vw, 34px);
+  color: var(--ls-text-strong);
+  display: block;
+}
+
+.cardTitleSm {
+  font-family: var(--ls-font-sans);
+  font-weight: 300;
+  font-size: clamp(18px, 2vw, 28px);
+  color: var(--ls-text-strong);
+  display: block;
+}
+
+.cardDesc {
+  margin: 6px 0 0;
+  font-family: var(--ls-font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ls-text-muted);
+  max-width: 44ch;
+}
+
+/* ── Connector ─────────────────────────────────────────────────── */
+.connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 40px 0;
+}
+
+.connectorLabel {
+  font-family: var(--ls-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ls-text-faint);
+}
+
+.connectorArrow { font-size: 22px; line-height: 1; color: var(--ls-accent); }
+
+/* ── Closing note ──────────────────────────────────────────────── */
+.closing {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--ls-border-hairline);
+}
+
+.closingIcon  { font-size: 18px; line-height: 1; color: var(--ls-accent); }
+.closingText  {
+  font-family: var(--ls-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ls-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { animation: none; }
+}

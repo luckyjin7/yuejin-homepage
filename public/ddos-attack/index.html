@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LUCID · DDoS Detection Simulator</title>
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5/index.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5/index.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { min-height: 0; }
+    .hero {
+      padding-top: .3rem;
+    }
+    #title-art {
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
+      line-height: 0;
+    }
+    #title-art .ta-line {
+      display: flex;
+      align-items: flex-start;
+      flex-wrap: nowrap;
+    }
+    #title-art .ta-char {
+      position: relative;
+      flex-shrink: 0;
+    }
+    #title-art .ta-block {
+      position: absolute;
+      background: #ffffff;
+      opacity: 0;
+      transform: scaleY(0.05);
+      transform-origin: center;
+    }
+    #title-art .ta-block.vis {
+      opacity: 1;
+      transform: scaleY(1);
+      transition: opacity 0.2s ease, transform 0.22s cubic-bezier(0.34,1.3,0.64,1);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="scan-line"></div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">LUCID<span class="logo-sub">IDS</span></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Cybersecurity Research
+      </div>
+
+      <!-- Block-art title — rendered by script below -->
+      <div id="title-art" role="heading" aria-level="1" aria-label="DDoS Detection Simulator"></div>
+
+      <p class="hero-desc">
+        A live simulation of the LUCID CNN-based intrusion detection framework
+        against TCP, UDP, and HTTP GET flood attacks simulated via MHDDoS in a LAN environment.
+      </p>
+      <div class="hero-actions">
+        <a href="simulator.html" target="_blank" class="btn-primary">Launch Simulator ↗</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><span class="hstat-n">CNN</span><span class="hstat-l">Architecture</span></div>
+        <div class="hstat-sep"></div>
+        <div class="hstat"><span class="hstat-n">3</span><span class="hstat-l">Attack types</span></div>
+        <div class="hstat-sep"></div>
+        <div class="hstat"><span class="hstat-n">96%</span><span class="hstat-l">Peak accuracy</span></div>
+        <div class="hstat-sep"></div>
+        <div class="hstat"><span class="hstat-n">10s</span><span class="hstat-l">Time windows</span></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /*
+     * Character map — IBM Plex Mono basis, 5×7 dot-matrix pixel font
+     * font-family: 'IBM Plex Mono', 'Courier New', monospace
+     *
+     * Pixel-font design principles:
+     *  - Every letter legible at minimum cell size (no ambiguity)
+     *  - Lowercase start at y=2 (x-height), capitals fill full 7 rows
+     *  - Descenders (p) extend below baseline at row 6
+     *  - i uses row 0 as tittle dot, body starts at row 2
+     *  - Consistent 4-wide grid except narrower l (3-wide) and i (3-wide)
+     *
+     * rows: array of 7 arrays, each inner array is a row of 0/1 pixels
+     * 1 = filled cell, 0 = empty
+     */
+    var C = {
+      /* ── Provided verbatim ─────────────────────────────────────────── */
+
+      /* b — full-height stem, two rounded bumps encoded as open-right bowls */
+      b: { w:4, rows:[
+        [1,0,0,0],
+        [1,0,0,0],
+        [1,1,1,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,1,1,0],
+      ]},
+
+      /* o — symmetric oval, x-height only (rows 2–6) */
+      o: { w:4, rows: [
+        [0,0,0,0],  // empty — was filled before
+        [0,0,0,0],  // empty
+        [0,1,1,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [0,1,1,0],
+      ]},
+
+      /* n — arch humped at row 2, two vertical legs */
+      n: { w:4, rows:[
+        [0,0,0,0],
+        [0,0,0,0],
+        [1,1,1,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+      ]},
+
+      /* s — Z-shaped counter reversal; distinct from 5 via open top */
+      s: { w:4, rows:[
+        [0,0,0,0],
+        [0,0,0,0],
+        [0,1,1,1],
+        [1,0,0,0],
+        [0,1,1,0],
+        [0,0,0,1],
+        [1,1,1,0],
+      ]},
+
+      /* p — bowl at x-height, descender stem continues below */
+      p: { w:4, rows:[
+        [0,0,0,0],
+        [0,0,0,0],
+        [1,1,1,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,1,1,0],
+        [1,0,0,0],
+      ]},
+
+      /* l — narrow 3-wide, cap-height serif top, angled foot */
+      l: { w:3, rows:[
+        [1,1,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,1],
+      ]},
+
+      /* i — dot at row 0, gap at row 1, body rows 2–6 with foot */
+      i: { w:3, rows:[
+        [0,1,0],
+        [0,0,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,0],
+        [0,1,0],
+      ]},
+
+      /* t — crossbar at row 2, angled foot for differentiation from l */
+      t: { w:4, rows:[
+        [0,1,0,0],
+        [0,1,0,0],
+        [1,1,1,0],
+        [0,1,0,0],
+        [0,1,0,0],
+        [0,1,0,0],
+        [0,0,1,1],
+      ]},
+
+      /* ── New — designed to match IBM Plex Mono pixel style ─────────── */
+
+      /* D — left spine full-height, right arc caps with open interior */
+      D: { w:4, rows:[
+        [1,1,1,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,1,1,0],
+      ]},
+
+      /* S — capital S mirrors lowercase s shape, expanded to full height */
+      S: { w:4, rows:[
+        [0,1,1,1],
+        [1,0,0,0],
+        [1,0,0,0],
+        [0,1,1,0],
+        [0,0,0,1],
+        [0,0,0,1],
+        [1,1,1,0],
+      ]},
+
+      /* e — x-height, cross-bar at mid, open bottom-right exit */
+      e: { w:4, rows: [
+        [0,0,0,0],
+        [0,0,0,0],
+        [0,1,1,0],
+        [1,0,0,1],
+        [1,1,1,1],
+        [1,0,0,0],
+        [0,1,1,1],
+      ]},
+
+      /* c — open-right arc, x-height; distinct from o by missing right wall */
+      c: { w:4, rows: [
+        [0,0,0,0],
+        [0,0,0,0],
+        [0,1,1,1],
+        [1,0,0,0],
+        [1,0,0,0],
+        [1,0,0,0],
+        [0,1,1,1],
+      ]},
+
+      /* m — 5-wide, double arch at row 2, three downward legs */
+      m: { w:5, rows: [
+        [0,0,0,0,0],
+        [0,0,0,0,0],
+        [1,1,0,1,0],
+        [1,0,1,0,1],
+        [1,0,1,0,1],
+        [1,0,0,0,1],
+        [1,0,0,0,1],
+      ]},
+
+      /* u — inverted n; legs drop to a connecting base */
+      u: { w:4, rows:[
+        [0,0,0,0],
+        [0,0,0,0],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [1,0,0,1],
+        [0,1,1,0],
+      ]},
+
+      /* a — single-story; open-top bowl, closed bottom with right leg */
+      a: { w:4, rows: [
+        [0,0,0,0],
+        [0,0,0,0],
+        [0,1,1,0],
+        [0,0,0,1],
+        [0,1,1,1],
+        [1,0,0,1],
+        [0,1,1,1],
+      ]},
+
+      /* r — stub arch top-right, single vertical leg; narrow */
+      r: { w:4, rows: [
+        [0,0,0,0],
+        [0,0,0,0],
+        [1,0,1,1],
+        [1,1,0,0],
+        [1,0,0,0],
+        [1,0,0,0],
+        [1,0,0,0],
+      ]},
+
+      /* ' ' — 2-wide empty spacer column */
+      ' ': { w:2, rows: Array(7).fill([0,0]) },
+    };
+
+    var COLOR      = '#ffffff';
+    var GAP        = 2;   /* px between cells */
+    var LGAP       = 3;   /* px between letters */
+    var ROWS       = 7;   /* dot-matrix row count */
+    var LINES      = ['DDoS Detection', 'Simulator'];
+    var ROW_DELAY  = 150; /* ms per row */
+    var INIT_DELAY = 400;
+
+    var root = document.getElementById('title-art');
+    if (!root) return;
+
+    /* Derive cell size from container width, widest line as reference */
+    function calcBS() {
+      var avail = root.offsetWidth;
+      var line  = LINES[0]; /* 'DDoS Detection' is widest */
+      var cols = 0, igaps = 0, lcount = 0;
+      for (var k = 0; k < line.length; k++) {
+        var d = C[line[k]];
+        if (d) { cols += d.w; igaps += (d.w - 1); lcount++; }
+      }
+      var overhead = igaps * GAP + (lcount - 1) * LGAP;
+      return Math.max(5, Math.min(14, Math.floor((avail - overhead) / cols)));
+    }
+
+    function render(bs) {
+      root.innerHTML = '';
+      var allBlocks = []; /* [domEl, rowIndex] */
+      var rr = Math.round(bs * 0.18); /* subtle dot-matrix rounding */
+
+      LINES.forEach(function (line, li) {
+        var lineEl = document.createElement('div');
+        lineEl.className = 'ta-line';
+        if (li > 0) lineEl.style.marginTop = Math.round(bs * 2.2) + 'px';
+
+        var firstChar = true;
+        for (var ci = 0; ci < line.length; ci++) {
+          var ch  = line[ci];
+          var def = C[ch];
+          if (!def) continue;
+
+          /* "DDoS" = line 0, first 4 chars → accent blue; rest → white */
+          var blockColor = (li === 0 && ci < 4) ? '#3080ff' : COLOR;
+
+          var cW = def.w   * (bs + GAP) - GAP;
+          var cH = ROWS    * (bs + GAP) - GAP;
+
+          var charEl = document.createElement('div');
+          charEl.className = 'ta-char';
+          charEl.style.width  = cW + 'px';
+          charEl.style.height = cH + 'px';
+          if (!firstChar) charEl.style.marginLeft = LGAP + 'px';
+          firstChar = false;
+
+          /* Iterate pixel grid */
+          def.rows.forEach(function (row, y) {
+            row.forEach(function (cell, x) {
+              if (!cell) return;
+              var blockEl = document.createElement('div');
+              blockEl.className = 'ta-block';
+              blockEl.style.left         = (x * (bs + GAP)) + 'px';
+              blockEl.style.top          = (y * (bs + GAP)) + 'px';
+              blockEl.style.width        = bs + 'px';
+              blockEl.style.height       = bs + 'px';
+              blockEl.style.background   = blockColor;
+              blockEl.style.borderRadius = rr + 'px';
+              blockEl.dataset.row        = y;
+              charEl.appendChild(blockEl);
+              allBlocks.push([blockEl, y]);
+            });
+          });
+
+          lineEl.appendChild(charEl);
+        }
+        root.appendChild(lineEl);
+      });
+
+      /* Row-by-row reveal, rows 0 → 6 */
+      for (var row = 0; row < ROWS; row++) {
+        (function (r) {
+          setTimeout(function () {
+            allBlocks.forEach(function (pair) {
+              if (pair[1] === r) pair[0].classList.add('vis');
+            });
+          }, INIT_DELAY + r * ROW_DELAY);
+        })(row);
+      }
+
+    }
+
+    var resizeTimer;
+    function init() { render(calcBS()); }
+    setTimeout(init, 0);
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(init, 120);
+    });
+  })();
+  </script>
+</body>
+</html>
