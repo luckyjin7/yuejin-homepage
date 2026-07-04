@@ -1,20 +1,15 @@
 import {
   Container,
   Badge,
-  Link,
   List,
   ListItem,
-  SimpleGrid,
   UnorderedList,
-  Heading,
-  Center,
   Box,
   Text,
   AspectRatio,
   Image
 } from '@chakra-ui/react'
 import Layout from '../../components/layouts/article'
-import { ExternalLinkIcon } from '@chakra-ui/icons'
 import { Title, WorkImage, Meta } from '../../components/work'
 import P from '../../components/paragraph'
 
@@ -25,7 +20,7 @@ const Work = () => (
         geospatial data visualization <Badge>2021</Badge>
       </Title>
       <P>
-        Geospatial data visualization for Spatial Analytics aims to use Yelp data to examine how people's affect is spatially distributed across
+        Geospatial data visualization for Spatial Analytics aims to use Yelp data to examine how people&apos;s affect is spatially distributed across
         the neighborhood - MetroTech Center in New York City.
       </P>
       <P>
