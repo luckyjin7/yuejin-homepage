@@ -131,7 +131,7 @@ export default function LandscapePage() {
                 playsInline
                 onClick={handleVideoClick}
               >
-                <source src="/videos/landscape.mp4" type="video/mp4" />
+                <source src="https://dbgftyntvqk2gwwb.public.blob.vercel-storage.com/landscape.mp4" type="video/mp4" />
               </video>
 
               <div className={s.controls}>

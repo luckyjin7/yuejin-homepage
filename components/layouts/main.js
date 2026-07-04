@@ -25,7 +25,7 @@ const HeroVideo = () => {
       <Box
         as="video"
         ref={videoRef}
-        src="/videos/cat-flower.mp4"
+        src="https://dbgftyntvqk2gwwb.public.blob.vercel-storage.com/cat-flower.mp4"
         autoPlay
         loop
         muted

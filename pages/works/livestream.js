@@ -27,7 +27,7 @@ const Work = () => (
 
       <div style={{ maxWidth: '640px', margin: '1rem 0', position: 'relative' }}>
         <video
-          src="/videos/livestream_architecture.mp4"
+          src="https://dbgftyntvqk2gwwb.public.blob.vercel-storage.com/livestream_architecture.mp4"
           controls
           preload="none"
           poster="/images/works/livestream_01.png"
