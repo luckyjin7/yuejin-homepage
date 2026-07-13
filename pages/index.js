@@ -7,6 +7,7 @@ import {
   Badge,
   useColorModeValue
 } from '@chakra-ui/react'
+import { AddIcon } from '@chakra-ui/icons'
 import Paragraph from '../components/paragraph'
 import Layout from '../components/layouts/article'
 import Section from '../components/section'
@@ -78,17 +79,24 @@ const Home = () => (
 
         <Box mt={6} mb={2}>
           <Text fontWeight="bold" mb={3}>
-            My take on LLM:
+            My take on Agentic AI:
           </Text>
           <Box
             borderLeftWidth="3px"
             borderLeftStyle="solid"
-            borderLeftColor={useColorModeValue('#3d7aed', '#ff63c3')}
+            borderLeftColor={useColorModeValue('#3d7aed', '#805AD5')}
             pl={4}
             py={1}
           >
+            <Text textAlign="justify" color={useColorModeValue('gray.700', 'gray.300')} mb={3}>
+              Ability to use AI for productivity <Badge colorScheme="blue" px={1} fontWeight="bold" fontSize="sm">+ 
+               </Badge> Awareness of mutual limitations between humans and AI <Badge colorScheme="blue" px={1} fontWeight="bold" fontSize="sm">{'>'}
+               </Badge> Fear of uncertainty about where AI is heading
+            </Text>
             <Text textAlign="justify" color={useColorModeValue('gray.700', 'gray.300')}>
-              Fully understanding how to use new tools + cleary recognizing the mutual limitations between humans and LLMs, is what lets us move past the fear of uncertainty, both about ourselves and about where AI is headed.
+              {/* <Text as="span" fontWeight="bold">P.S.</Text>{' '} */}
+              <Badge colorScheme="blue" px={1} fontWeight="bold" fontSize="sm">P.S.</Badge>{' '}
+              No matter how AI develops, humans decide when to hit the gas or the brake. Better stay clear-headed, my friend.
             </Text>
           </Box>
         </Box>
