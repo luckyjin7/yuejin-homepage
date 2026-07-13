@@ -7,7 +7,6 @@ import {
   Badge,
   useColorModeValue
 } from '@chakra-ui/react'
-import { AddIcon } from '@chakra-ui/icons'
 import Paragraph from '../components/paragraph'
 import Layout from '../components/layouts/article'
 import Section from '../components/section'
