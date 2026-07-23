@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import {
   Container,
-  Badge,
   Link,
   List,
   ListItem,

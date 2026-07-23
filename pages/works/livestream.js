@@ -1,6 +1,5 @@
 import {
   Container,
-  Badge,
   List,
   ListItem
 } from '@chakra-ui/react'
