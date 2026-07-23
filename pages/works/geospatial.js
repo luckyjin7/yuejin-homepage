@@ -17,7 +17,7 @@ const Work = () => (
   <Layout title="geospatial">
     <Container>
       <Title>
-        geospatial data visualization <Badge>2021</Badge>
+        geospatial data visualization
       </Title>
       <P>
         Geospatial data visualization for Spatial Analytics aims to use Yelp data to examine how people&apos;s affect is spatially distributed across

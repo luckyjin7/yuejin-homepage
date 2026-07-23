@@ -12,7 +12,7 @@ const Work = () => (
   <Layout title="livestream architecture">
     <Container>
       <Title>
-        Livestream Architecture <Badge>2020-</Badge>
+        Livestream Architecture
       </Title>
       <P>
         Developed an interactive real-time project on the Twitch gaming platform that enabled dynamic audience engagement

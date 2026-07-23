@@ -24,7 +24,7 @@ const Work = () => {
     <Layout title="iPhoto Journey">
       <Container>
         <Title>
-          iPhoto Journey <Badge>2024</Badge>
+          iPhoto Journey
         </Title>
         <P>
           A client-side scrollytelling app that reads EXIF GPS metadata from

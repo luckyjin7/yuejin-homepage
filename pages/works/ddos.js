@@ -36,7 +36,7 @@ const Work = () => {
     <Layout title="DDoS Detection Simulator">
       <Container>
         <Title>
-          DDoS Detection Simulator <Badge>2024-2025</Badge>
+          DDoS Detection Simulator
         </Title>
         <P>
           An interactive simulation of the LUCID CNN-based intrusion detection
