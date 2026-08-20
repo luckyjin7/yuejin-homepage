@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { useRouter } from 'next/router'
 import {
   Link,
   Container,
@@ -12,120 +14,125 @@ import Layout from '../components/layouts/article'
 import Section from '../components/section'
 import { WorksSection } from './works'
 import Image from 'next/image'
+import HeroVideo from '../components/hero-video'
 
-const Home = () => (
-  <Layout>
-    <Container>
-      <Box
-        borderRadius="lg"
-        mb={6}
-        p={3}
-        textAlign="center"
-        bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.200')}
-        css={{ backdropFilter: 'blur(10px)' }}
-      >
-        Hello, I&apos;m a software developer based in Canada!
-      </Box>
+const Home = () => {
+  const router = useRouter()
 
-      <Box display={{ md: 'flex' }}>
-        <Box flexGrow={1}>
-          <Heading as="h2" variant="page-title">
-            Yue JIN<Text as="span" fontSize="sm" color="gray.500" ml={2}>(English name: Shirley)</Text>
-          </Heading>
-          <p>Developer / Designer / Architect</p>
-        </Box>
+  useEffect(() => {
+    if (!router.asPath.includes('#works')) return
+    // wait for the page-enter and section-stagger animations to settle
+    // before measuring/scrolling, so we land exactly on the heading
+    const timer = setTimeout(() => {
+      document.getElementById('works')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [router.asPath])
+
+  return (
+    <Layout>
+      <Container>
         <Box
-          flexShrink={0}
-          mt={{ base: 4, md: 0 }}
-          ml={{ md: 6 }}
+          borderRadius="lg"
+          mt={6}
+          mb={6}
+          p={3}
           textAlign="center"
+          bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.200')}
+          css={{ backdropFilter: 'blur(10px)' }}
         >
+          Hello, I&apos;m a software developer based in Canada!
+        </Box>
+
+        <Box display={{ md: 'flex' }}>
+          <Box flexGrow={1}>
+            <Heading as="h2" variant="page-title">
+              Yue JIN<Text as="span" fontSize="sm" color="gray.500" ml={2}>(English name: Catherine)</Text>
+            </Heading>
+            <p>Developer / Designer / Architect</p>
+          </Box>
           <Box
-            borderColor="whiteAlpha.800"
-            borderWidth={2}
-            borderStyle="solid"
-            w="100px"
-            h="100px"
-            display="inline-block"
-            borderRadius="full"
-            overflow="hidden"
+            flexShrink={0}
+            mt={{ base: 4, md: 0 }}
+            ml={{ md: 6 }}
+            textAlign="center"
           >
-            <Image
-              src="/images/yue.jpg"
-              alt="Profile image"
-              width="100"
-              height="100"
-            />
+            <Box
+              borderColor="whiteAlpha.800"
+              borderWidth={2}
+              borderStyle="solid"
+              w="100px"
+              h="100px"
+              display="inline-block"
+              borderRadius="full"
+              overflow="hidden"
+            >
+              <Image
+                src="/images/yue.jpg"
+                alt="Profile image"
+                width="100"
+                height="100"
+              />
+            </Box>
           </Box>
         </Box>
-      </Box>
 
-      <Section delay={0.1}>
-        <Heading as="h3" variant="section-title">
-          Bio
-        </Heading>
-        <Paragraph>
-          I am a develper based in Vancouver, BC, Canada. I have a cat assistant to help me{' '}
-          <span style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>(hopefully)</span>{' '}
-          when sitting in front of the computer.
-        </Paragraph>
-        <Paragraph>
-          This website is my humble abode on the Internet, where I stash some fun personal development projects, ranging from{' '}
-          <Badge colorScheme="blue">software development</Badge>{' to '}
-          <Badge colorScheme="green">GIS</Badge>{' and '}
-          <Badge colorScheme="purple">3D modeling</Badge>.
-        </Paragraph>
+        <Section delay={0.1}>
+          <Heading as="h3" variant="section-title">
+            Bio
+          </Heading>
+          <Paragraph>
+            I am a develper based in Vancouver, BC, Canada. I have a cat assistant to help me{' '}
+            <span style={{ textDecoration: 'underline', textDecorationStyle: 'dotted' }}>(hopefully)</span>{' '}
+            when sitting in front of the computer.
+          </Paragraph>
+          <Paragraph>
+            This website is my humble abode on the Internet, where I stash some fun personal development projects, ranging from{' '}
+            <Badge colorScheme="blue">secure software development</Badge>{' to '}
+            <Badge colorScheme="green">GIS</Badge>{' and '}
+            <Badge colorScheme="purple">3D modeling</Badge>.
+          </Paragraph>
+        </Section>
 
-        <Box mt={6} mb={2}>
-          <Text fontWeight="bold" mb={3}>
-            My take on Agentic AI:
-          </Text>
-          <Box
-            borderLeftWidth="3px"
-            borderLeftStyle="solid"
-            borderLeftColor={useColorModeValue('#3d7aed', '#805AD5')}
-            pl={4}
-            py={1}
-          >
-            <Text textAlign="justify" color={useColorModeValue('gray.700', 'gray.300')} mb={3}>
-              Ability to use AI for productivity <Badge colorScheme="blue" px={1} fontWeight="bold" fontSize="sm">+ 
-               </Badge> Awareness of mutual limitations between humans and AI <Badge colorScheme="blue" px={1} fontWeight="bold" fontSize="sm">{'>'}
-               </Badge> Fear of uncertainty about where AI is heading
-            </Text>
-            <Text textAlign="justify" color={useColorModeValue('gray.700', 'gray.300')}>
-              {/* <Text as="span" fontWeight="bold">P.S.</Text>{' '} */}
-              <Badge colorScheme="blue" px={1} fontWeight="bold" fontSize="sm">P.S.</Badge>{' '}
-              No matter how AI develops, humans decide when to hit the gas or the brake. Better stay clear-headed, my friend.
-            </Text>
-          </Box>
+        <Section delay={0.2} id="works" scrollMarginTop="90px">
+          <Heading as="h3" variant="section-title">
+            Works
+          </Heading>
+          <WorksSection />
+        </Section>
+
+        <Section delay={0.3}>
+          <Heading as="h3" variant="section-title">
+            I ♥
+          </Heading>
+          <Paragraph>
+            Art,{' '}
+            <Link href="/works/landscape" target="_blank">
+              <Badge
+                bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')}
+                color={useColorModeValue('#3d7aed', '#ff63c3')}
+              >Architectural Design</Badge>
+            </Link>
+            , Geography, Machine Learning, Music
+          </Paragraph>
+        </Section>
+
+        <Text
+          textAlign="center"
+          fontStyle="italic"
+          color={useColorModeValue('gray.600', 'gray.400')}
+          mb={4}
+        >
+          Enjoy your time!
+        </Text>
+
+        <Box px={4}>
+          <HeroVideo />
         </Box>
-      </Section>
-
-      <Section delay={0.2} id="works">
-        <Heading as="h3" variant="section-title">
-          Works
-        </Heading>
-        <WorksSection />
-      </Section>
-
-      <Section delay={0.3}>
-        <Heading as="h3" variant="section-title">
-          I ♥
-        </Heading>
-        <Paragraph>
-          Art,{' '}
-          <Link href="/works/landscape" target="_blank">
-            <Badge
-              bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')}
-              color={useColorModeValue('#3d7aed', '#ff63c3')}
-            >Architectural Design</Badge>
-          </Link>
-          , Geography, Machine Learning, Music
-        </Paragraph>
-      </Section>
-    </Container>
-  </Layout>
-)
+      </Container>
+    </Layout>
+  )
+}
 
 export default Home
 export { getServerSideProps } from '../components/chakra'
