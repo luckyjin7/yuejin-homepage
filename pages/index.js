@@ -7,6 +7,8 @@ import {
   Box,
   Text,
   Badge,
+  Tooltip,
+  useClipboard,
   useColorModeValue
 } from '@chakra-ui/react'
 import Paragraph from '../components/paragraph'
@@ -16,8 +18,11 @@ import { WorksSection } from './works'
 import Image from 'next/image'
 import HeroVideo from '../components/hero-video'
 
+const EMAIL = 'iamyuejin@gmail.com'
+
 const Home = () => {
   const router = useRouter()
+  const { onCopy, hasCopied } = useClipboard(EMAIL)
 
   useEffect(() => {
     if (!router.asPath.includes('#works')) return
@@ -47,9 +52,18 @@ const Home = () => {
         <Box display={{ md: 'flex' }}>
           <Box flexGrow={1}>
             <Heading as="h2" variant="page-title">
-              Yue JIN<Text as="span" fontSize="sm" color="gray.500" ml={2}>(English name: Catherine)</Text>
+              Hey, I&apos;m{' '}
+              <ruby>
+                Yue
+                <rp>(</rp>
+                <rt style={{ fontSize: '0.5em', fontWeight: 'normal' }}>玥</rt>
+                <rp>)</rp>
+              </ruby>
             </Heading>
-            <p>Developer / Designer / Architect</p>
+            <Text fontSize="sm" color="gray.500" mb={2}>
+            My name is pronounced as &quot;yweh&quot; (/yɥɛ/)
+            </Text>
+            <Text mb={8}>Developer / Designer / Architect</Text>
           </Box>
           <Box
             flexShrink={0}
@@ -91,6 +105,24 @@ const Home = () => {
             <Badge colorScheme="blue">secure software development</Badge>{' to '}
             <Badge colorScheme="green">GIS</Badge>{' and '}
             <Badge colorScheme="purple">3D modeling</Badge>.
+          </Paragraph>
+          <Paragraph>
+            Feel free to reach me at{' '}
+            <Tooltip label={hasCopied ? 'Copied!' : 'Click to copy'} closeOnClick={false} hasArrow>
+              <Badge
+                as="button"
+                type="button"
+                colorScheme="blue"
+                textTransform="none"
+                fontSize="inherit"
+                fontWeight="normal"
+                cursor="pointer"
+                onClick={onCopy}
+              >
+                {EMAIL}
+              </Badge>
+            </Tooltip>
+            .
           </Paragraph>
         </Section>
 
