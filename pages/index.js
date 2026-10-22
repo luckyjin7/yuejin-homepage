@@ -102,9 +102,9 @@ const Home = () => {
           </Paragraph>
           <Paragraph>
             This website is my humble abode on the Internet, where I stash some fun personal development projects, ranging from{' '}
-            <Badge colorScheme="blue">secure software development</Badge>{' to '}
-            <Badge colorScheme="green">GIS</Badge>{' and '}
-            <Badge colorScheme="purple">3D modeling</Badge>.
+            <Badge bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')} color={useColorModeValue('#3d7aed', '#ff63c3')}>secure software development</Badge>{' to '}
+            <Badge bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')} color={useColorModeValue('#3d7aed', '#ff63c3')}>GIS</Badge>{' and '}
+            <Badge bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')} color={useColorModeValue('#3d7aed', '#ff63c3')}>3D modeling</Badge>.
           </Paragraph>
           <Paragraph>
             Feel free to reach me at{' '}
@@ -112,7 +112,7 @@ const Home = () => {
               <Badge
                 as="button"
                 type="button"
-                colorScheme="blue"
+                colorScheme="purple"
                 textTransform="none"
                 fontSize="inherit"
                 fontWeight="normal"
@@ -140,10 +140,7 @@ const Home = () => {
           <Paragraph>
             Art,{' '}
             <Link href="/works/landscape" target="_blank">
-              <Badge
-                bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')}
-                color={useColorModeValue('#3d7aed', '#ff63c3')}
-              >Architectural Design</Badge>
+              <Badge bg={useColorModeValue('blue.50', 'rgba(255,99,195,0.15)')} color={useColorModeValue('#3d7aed', '#ff63c3')}>Architectural Design</Badge>
             </Link>
             , Geography, Machine Learning, Music
           </Paragraph>
