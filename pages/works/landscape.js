@@ -1,7 +1,32 @@
 import Head from 'next/head'
+import Image from 'next/image'
+import { Instrument_Serif, Hanken_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { IoVolumeHigh, IoVolumeMute } from 'react-icons/io5'
 import s from '../../styles/landscape.module.css'
 import { useVideoPlayer } from '../../hooks/useVideoPlayer'
+
+// Self-hosted via next/font instead of a <link> to Google Fonts in this
+// page's <Head> — avoids the "custom fonts only load for a single page"
+// warning (next/font subsets, preloads, and inlines these at build time,
+// so there's no extra network request to fonts.googleapis.com at all).
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  variable: '--font-instrument-serif',
+  display: 'swap'
+})
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500'],
+  variable: '--font-hanken-grotesk',
+  display: 'swap'
+})
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap'
+})
 
 const IMG = {
   refuse:            '/images/landscape/refuse.webp',
@@ -38,7 +63,13 @@ function ImageCard({ src, alt, contain = false, altBg = false, titleSize = 'lg',
   return (
     <div className={s.col}>
       <div className={`${s.card}${altBg ? ` ${s.cardAlt}` : ''}`}>
-        <img src={src} alt={alt} className={contain ? s.cardImgContain : s.cardImg} />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 900px) 90vw, 45vw"
+          className={contain ? s.cardImgContain : s.cardImg}
+        />
       </div>
       <div className={s.cardMeta}>
         <span className={titleSize === 'sm' ? s.cardTitleSm : s.cardTitle}>{title}</span>
@@ -77,12 +108,6 @@ export default function LandscapePage() {
       <Head>
         <title>Design Prototypes — Lake in Yunnan, China</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet"
-        />
         <style>{`
           :root {
             --ls-paper:           #FAF8F3;
@@ -107,14 +132,14 @@ export default function LandscapePage() {
             --ls-accent:          var(--ls-accent-500);
             --ls-radius-md:       8px;
             --ls-ring:            inset 0 0 0 1px var(--ls-border-hairline);
-            --ls-font-display:    'Instrument Serif', Georgia, serif;
-            --ls-font-sans:       'Hanken Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
-            --ls-font-mono:       'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+            --ls-font-display:    var(--font-instrument-serif), Georgia, serif;
+            --ls-font-sans:       var(--font-hanken-grotesk), -apple-system, BlinkMacSystemFont, sans-serif;
+            --ls-font-mono:       var(--font-jetbrains-mono), ui-monospace, 'SF Mono', Menlo, monospace;
           }
         `}</style>
       </Head>
 
-      <main className={s.page}>
+      <main className={`${s.page} ${instrumentSerif.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable}`}>
 
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className={s.hero}>

@@ -6,13 +6,7 @@ export default class Document extends NextDocument {
   render() {
     return (
       <Html lang="en">
-        <Head>
-          <style jsx global>{`
-            html {
-              scroll-behavior: smooth;
-            }
-          `}</style>
-        </Head>
+        <Head />
         <body>
           <ColorModeScript initialColorMode={theme.config.initialColorMode} />
           <Main />
