@@ -22,7 +22,7 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
-import { DiagramFrame, FigCaption, Lens, Note } from '../../components/case-study'
+import { Lens, Note } from '../../components/case-study'
 import { Title, Meta } from '../../components/work'
 import P from '../../components/paragraph'
 import Section from '../../components/section'
@@ -426,31 +426,6 @@ const Work = () => (
         </P>
         <ChatMockFigure />
       </Section>
-
-      {/* <Section delay={0.25}>
-        <Heading as="h3" variant="section-title">
-          Four bets, and what backs them up
-        </Heading>
-        <P>
-          The thinking behind the guardrails: what could go wrong, why it would matter,
-          what was shipped against it, and what catches it if that shipped answer is
-          itself wrong.
-        </P>
-        <DiagramFrame naturalWidth={1000} naturalHeight={460}>
-          <ProblemSolutionFigure />
-        </DiagramFrame>
-        <FigCaption>
-          Fig. 02, where each row reads left to right. The backstop column is
-          deliberately a different mechanism from the solution column, not a stricter
-          copy of it.
-        </FigCaption>
-        <Note>
-          <b>Failure philosophy:</b> money/UX layers (triage, logging, metrics) fail{' '}
-          <i>open</i>, meaning they can break without hurting an answer. Facts/execution
-          layers (the gateway, the database role) fail <i>closed</i>, since &quot;no
-          data&quot; beats a wrong number every time.
-        </Note>
-      </Section> */}
 
       <Section delay={0.3}>
         <Heading as="h3" variant="section-title">
