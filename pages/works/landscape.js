@@ -11,6 +11,7 @@ import { useVideoPlayer } from '../../hooks/useVideoPlayer'
 // so there's no extra network request to fonts.googleapis.com at all).
 const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
+  weight: ['400'],
   style: ['normal', 'italic'],
   variable: '--font-instrument-serif',
   display: 'swap'
